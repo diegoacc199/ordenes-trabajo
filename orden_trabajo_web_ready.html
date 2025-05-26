@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Orden de Trabajo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .form-container {
+      max-width: 500px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Orden de Trabajo</h2>
+    <label>Nombre del cliente:</label>
+    <input type="text" id="cliente">
+
+    <label>Número de WhatsApp:</label>
+    <input type="text" id="whatsapp">
+
+    <label>Fecha:</label>
+    <input type="date" id="fecha">
+
+    <label>Trabajo realizado:</label>
+    <textarea id="trabajo" rows="3" placeholder="Ej. Banner 1m x 2m con diseño incluido"></textarea>
+
+    <label>Precio:</label>
+    <input type="text" id="precio" placeholder="Ej. S/ 45.00">
+
+    <label>¿Pagado?:</label>
+    <select id="pagado">
+      <option value="Sí">Sí</option>
+      <option value="No">No</option>
+    </select>
+
+    <button onclick="generarPDF()">Generar PDF</button>
+  </div>
+
+  <script>
+    // Función para obtener parámetros de la URL
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+
+    // Al cargar, poner fecha y rellenar datos desde la URL
+    window.onload = function () {
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoy.getDate()).padStart(2, '0');
+      document.getElementById('fecha').value = `${yyyy}-${mm}-${dd}`;
+
+      document.getElementById('cliente').value = getParam('nombre');
+      document.getElementById('whatsapp').value = getParam('numero');
+    };
+
+    async function generarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const cliente = document.getElementById('cliente').value;
+      const whatsapp = document.getElementById('whatsapp').value;
+      const fecha = document.getElementById('fecha').value;
+      const trabajo = document.getElementById('trabajo').value;
+      const precio = document.getElementById('precio').value;
+      const pagado = document.getElementById('pagado').value;
+
+      let y = 20;
+      doc.setFontSize(16);
+      doc.text("ORDEN DE TRABAJO", 105, y, null, null, "center");
+      doc.setFontSize(12);
+
+      y += 15; doc.text(`Fecha: ${fecha}`, 20, y);
+      y += 10; doc.text(`Cliente: ${cliente}`, 20, y);
+      y += 10; doc.text(`WhatsApp: ${whatsapp}`, 20, y);
+      y += 10; doc.text("Trabajo realizado:", 20, y);
+      y += 10; doc.text(trabajo, 25, y, { maxWidth: 160 });
+      y += 30; doc.text(`Precio: ${precio}`, 20, y);
+      y += 10; doc.text(`¿Pagado?: ${pagado}`, 20, y);
+
+      doc.save(`orden_${cliente || 'cliente'}.pdf`);
+    }
+  </script>
+</body>
+</html>
